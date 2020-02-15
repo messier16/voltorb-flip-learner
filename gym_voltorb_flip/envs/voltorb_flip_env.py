@@ -5,7 +5,7 @@ import numpy as np
 from gym import spaces
 from gym.utils import colorize
 from six import StringIO
-from voltorb_flip.game import CellState, VoltorbFlip
+from voltorb_flip.game import CellState, GameState, UnableToFlipException, VoltorbFlip
 
 COVERED_CHARACTER = "?"
 MARKED_CHARACTER = "M"
@@ -57,15 +57,35 @@ class VoltorbFlipEnv(gym.Env):
 
     def reset(self):
         self.game = VoltorbFlip()
-        return _encoded_state
+        return self._encoded_state()
 
     def step(self, action):
         if not self.action_space.contains(action):
             raise ValueError(
                 f"action {str(action)} is not part of the environment's action space"
             )
+        row, column = action
+        reward = 0
+        done = False
+        info = dict()
 
-        self.game.flip(action[0], action[1])
+        try:
+            self.game.flip(row, column)
+            reward = self.game.board[row][column]
+        except UnableToFlipException:
+            reward = 0
+
+        if self.game.state == GameState.IN_PROGRESS:
+            done = False
+        elif self.game.state == GameState.WON:
+            if self.game.level == self.game.MAX_LEVEL:
+                done = True
+            self.game.bump_level()
+            reward = 100
+        else:
+            done = True
+
+        return self._encoded_state, reward, done, info
 
     def render(self, mode="human"):
         outfile = StringIO() if mode == "ansi" else sys.stdout
