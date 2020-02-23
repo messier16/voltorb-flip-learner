@@ -24,7 +24,7 @@ class VoltorbFlipEnv(gym.Env):
         )
 
         self.board_space = spaces.Box(
-            low=0,
+            low=-1,
             high=3,
             shape=(self.game.CLASSIC_BOARD_SIZE, self.game.CLASSIC_BOARD_SIZE),
             dtype=np.uint8,
@@ -85,15 +85,17 @@ class VoltorbFlipEnv(gym.Env):
         else:
             done = True
 
-        return self._encoded_state, reward, done, info
+        return self._encoded_state(), reward, done, info
 
     def render(self, mode="human"):
         outfile = StringIO() if mode == "ansi" else sys.stdout
         outfile.write("\n".join(self._get_board()))
 
     def _encoded_state(self):
+        mask = np.array(env.game.cell_states)
+        board = np.array(env.game.board)
         return (
-            np.array(self.game.board),
+            np.where(mask == CellState.COVERED, -1, board),
             np.array(self.game.horizontal_bombs),
             np.array(self.game.vertical_bombs),
             np.array(self.game.horizontal_points),
