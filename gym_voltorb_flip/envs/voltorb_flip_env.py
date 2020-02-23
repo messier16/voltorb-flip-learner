@@ -92,8 +92,8 @@ class VoltorbFlipEnv(gym.Env):
         outfile.write("\n".join(self._get_board()))
 
     def _encoded_state(self):
-        mask = np.array(env.game.cell_states)
-        board = np.array(env.game.board)
+        mask = np.array(self.game.cell_states)
+        board = np.array(self.game.board)
         return (
             np.where(mask == CellState.COVERED, -1, board),
             np.array(self.game.horizontal_bombs),
