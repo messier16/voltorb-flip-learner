@@ -10,12 +10,13 @@ from voltorb_flip.game import CellState, GameState, UnableToFlipException, Volto
 COVERED_CHARACTER = "?"
 MARKED_CHARACTER = "M"
 
+REWARD_MULTIPLIER = 10
 
 class VoltorbFlipEnv(gym.Env):
-    def __init__(self):
+    def __init__(self, reward_multiplier=REWARD_MULTIPLIER):
         super().__init__()
         self.game = VoltorbFlip()
-
+        self.reward_multiplier = reward_multiplier
         self.action_space = spaces.Tuple(
             [
                 spaces.Discrete(self.game.CLASSIC_BOARD_SIZE),
@@ -71,9 +72,9 @@ class VoltorbFlipEnv(gym.Env):
 
         try:
             self.game.flip(row, column)
-            reward = self.game.board[row][column]
+            reward = self.game.board[row][column] * self.reward_multiplier
         except UnableToFlipException:
-            reward = 0
+            reward = -1 * self.reward_multiplier
         except GameOverException:
             pass
 
@@ -83,9 +84,9 @@ class VoltorbFlipEnv(gym.Env):
             if self.game.level == self.game.MAX_LEVEL:
                 done = True
             self.game.bump_level()
-            reward = 5
+            reward = 5 * self.reward_multiplier
         else:
-            reward = -1
+            reward = -5 * self.reward_multiplier
             done = True
 
         info["game_state"] = self.game.state
