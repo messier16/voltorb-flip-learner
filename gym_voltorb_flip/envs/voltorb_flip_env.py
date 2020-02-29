@@ -74,6 +74,8 @@ class VoltorbFlipEnv(gym.Env):
             reward = self.game.board[row][column]
         except UnableToFlipException:
             reward = 0
+        except GameOverException:
+            pass
 
         if self.game.state == GameState.IN_PROGRESS:
             done = False
@@ -81,9 +83,12 @@ class VoltorbFlipEnv(gym.Env):
             if self.game.level == self.game.MAX_LEVEL:
                 done = True
             self.game.bump_level()
-            reward = 100
+            reward = 5
         else:
+            reward = -1
             done = True
+
+        info["game_state"] = self.game.state
 
         return self._encoded_state(), reward, done, info
 
