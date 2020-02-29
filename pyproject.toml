@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gym_voltorb_flip"
-version = "0.2.3-dev"
+version = "0.2.4-dev"
 description = "A VoltorbFlip environment"
 authors = ["Antonio Feregrino <antonio.feregrino@gmail.com>"]
 license = "MIT"
